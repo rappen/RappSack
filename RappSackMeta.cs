@@ -9,7 +9,13 @@ namespace Rappen.XRM.RappSack
 {
     public static class RappSackMeta
     {
+        #region *** Private properties ***
+
         private static Dictionary<IOrganizationService, Dictionary<string, EntityMetadata>> entities = new Dictionary<IOrganizationService, Dictionary<string, EntityMetadata>>();
+
+        #endregion *** Private properties ***
+
+        #region *** Internat properties ***
 
         internal static string[] entityProperties = {
             "LogicalName",
@@ -56,6 +62,10 @@ namespace Rappen.XRM.RappSack
             "SchemaName",
             "Targets"
         };
+
+        #endregion *** Internat properties ***
+
+        #region *** Public IOrganizationService extensions ***
 
         public static AttributeMetadata GetAttribute(this IOrganizationService service, string entity, string attribute, object value)
         {
@@ -160,35 +170,9 @@ namespace Rappen.XRM.RappSack
             }
         }
 
-        public static bool IsPOA(this AttributeMetadata attribute) => IsPOA(attribute?.LogicalName);
+        #endregion *** Public IOrganizationService extensions ***
 
-        public static bool IsPOA(this string attribute) => attribute?.EndsWith("accessrightsmask") == true;
-
-        /// <summary>
-        /// Don't try to retrieve properties when this version don't have it.
-        /// Got the info from https://github.com/albanian-xrm/PackageHistoryBuilder
-        /// </summary>
-        /// <param name="entitiesoptions"></param>
-        /// <param name="orgMajorVer"></param>
-        /// <param name="orgMinorVer"></param>
-        /// <returns></returns>
-        private static string[] GetEntityDetailsForVersion(string[] entitiesoptions, int orgMajorVer, int orgMinorVer)
-        {
-            var result = entitiesoptions.ToList();
-            if (orgMajorVer < 7 || (orgMajorVer == 7 && orgMinorVer < 1))
-            {
-                result.Remove("LogicalCollectionName");
-            }
-            if (orgMajorVer < 8 || (orgMajorVer == 8 && orgMinorVer < 2))
-            {
-                result.Remove("IsLogicalEntity");
-            }
-            if (orgMajorVer < 9)
-            {
-                result.Remove("DataProviderId");
-            }
-            return result.ToArray();
-        }
+        #region *** Public EntityMetadata extensions ***
 
         public static string ToDisplayName(this EntityMetadata entity, bool includelogicalname = false)
         {
@@ -223,6 +207,14 @@ namespace Rappen.XRM.RappSack
             }
             return entity.LogicalCollectionName;
         }
+
+        #endregion *** Public EntityMetadata extensions ***
+
+        #region *** Public AttributeMetadata extension ***
+
+        public static bool IsPOA(this AttributeMetadata attribute) => IsPOA(attribute?.LogicalName);
+
+        public static bool IsPOA(this string attribute) => attribute?.EndsWith("accessrightsmask") == true;
 
         public static string ToDisplayName(this AttributeMetadata attribute, bool includetype = false)
         {
@@ -266,5 +258,37 @@ namespace Rappen.XRM.RappSack
             }
             return result;
         }
+
+        #endregion *** Public AttributeMetadata extension ***
+
+        #region *** Private methods ***
+
+        /// <summary>
+        /// Don't try to retrieve properties when this version don't have it.
+        /// Got the info from https://github.com/albanian-xrm/PackageHistoryBuilder
+        /// </summary>
+        /// <param name="entitiesoptions"></param>
+        /// <param name="orgMajorVer"></param>
+        /// <param name="orgMinorVer"></param>
+        /// <returns></returns>
+        private static string[] GetEntityDetailsForVersion(string[] entitiesoptions, int orgMajorVer, int orgMinorVer)
+        {
+            var result = entitiesoptions.ToList();
+            if (orgMajorVer < 7 || (orgMajorVer == 7 && orgMinorVer < 1))
+            {
+                result.Remove("LogicalCollectionName");
+            }
+            if (orgMajorVer < 8 || (orgMajorVer == 8 && orgMinorVer < 2))
+            {
+                result.Remove("IsLogicalEntity");
+            }
+            if (orgMajorVer < 9)
+            {
+                result.Remove("DataProviderId");
+            }
+            return result.ToArray();
+        }
+
+        #endregion *** Private methods ***
     }
 }
