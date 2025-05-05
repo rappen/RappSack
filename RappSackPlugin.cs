@@ -2,18 +2,48 @@
 using Microsoft.Xrm.Sdk.Extensions;
 using Rappen.Dataverse.Canary;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Rappen.XRM.RappSack
 {
     public abstract class RappSackPlugin : RappSackCore, IPlugin, ITracingService
     {
+        #region Easier to get relevant from IPlugin
+
         public IPluginExecutionContext5 Context { get; private set; }
         public ContextEntity ContextEntity { get; private set; }
         public ContextEntityCollection ContextEntityCollection { get; private set; }
         public Entity Target => ContextEntity?[ContextEntityType.Target];
 
+        #endregion Easier to get relevant from IPlugin
+
+        #region Execute plugin as
+
         public virtual ServiceAs ServiceAs { get; } = ServiceAs.User;
         public virtual string ExecuterEnvVar { get; } = string.Empty;
+
+        #endregion Execute plugin as
+
+        #region Need details from the plugin, override in plugins if needed
+
+        public virtual bool NeedThrowIfNotMatch { get; } = false;
+        public virtual string NeedMessage { get; } = string.Empty;
+        public virtual int NeedStage { get; } = -1;
+        public virtual string NeedEntity { get; } = string.Empty;
+        public virtual string[] NeedAttributes { get; } = null;
+        public virtual bool NeedPreImage { get; } = false;
+        public virtual bool NeedPostImage { get; } = false;
+
+        #endregion Need details from the plugin, override in plugins if needed
+
+        #region Abstract methods
+
+        public abstract void Execute();
+
+        #endregion Abstract methods
+
+        #region Public methods
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -24,6 +54,10 @@ namespace Rappen.XRM.RappSack
                 ContextEntity = new ContextEntity(Context);
                 ContextEntityCollection = new ContextEntityCollection(Context);
                 SetTracer(new RappSackPluginTracer(serviceProvider));
+                if (!NeedsVerified())
+                {
+                    return;
+                }
                 Guid? svcuser = null;
                 switch (ServiceAs)
                 {
@@ -61,11 +95,55 @@ namespace Rappen.XRM.RappSack
             }
         }
 
-        public abstract void Execute();
-
         public void Trace(string format, params object[] args) => base.Trace(string.Format(format, args));
 
+        #endregion Public methods
+
+        #region Private methods
+
+        private bool NeedsVerified()
+        {
+            var needtexts = new List<string>();
+            if (!string.IsNullOrEmpty(NeedMessage) && !NeedMessage.Equals(Context.MessageName, StringComparison.OrdinalIgnoreCase))
+            {
+                needtexts.Add($"Wrong message: {Context.MessageName}, need: {NeedMessage}");
+            }
+            if (NeedStage != -1 && NeedStage != Context.Stage)
+            {
+                needtexts.Add($"Wrong stage: {Context.Stage}, need: {NeedStage}");
+            }
+            if (!string.IsNullOrEmpty(NeedEntity) && !NeedEntity.Equals(Context.PrimaryEntityName, StringComparison.OrdinalIgnoreCase))
+            {
+                needtexts.Add($"Wrong entity: {Context.PrimaryEntityName}, need: {NeedEntity}");
+            }
+            if (NeedAttributes != null && NeedAttributes.Length > 0 && ContextEntity[ContextEntityType.Target].Attributes.Any(a => NeedAttributes.Any(n => n == a.Key)))
+            {
+                needtexts.Add($"Need any attributes: {string.Join(", ", NeedAttributes)}");
+            }
+            if (NeedPreImage && ContextEntity[ContextEntityType.PreImage] == null)
+            {
+                needtexts.Add($"Missing pre image");
+            }
+            if (NeedPostImage && ContextEntity[ContextEntityType.PostImage] == null)
+            {
+                needtexts.Add($"Missing post image");
+            }
+            if (needtexts.Count == 0)
+            {
+                return true;
+            }
+            var needtext = string.Join(Environment.NewLine, needtexts);
+            if (NeedThrowIfNotMatch)
+            {
+                throw new InvalidPluginExecutionException(needtext);
+            }
+            Trace(needtext);
+            return false;
+        }
+
         private void SetService(IServiceProvider provider, Guid? userid) => SetService(provider.Get<IOrganizationServiceFactory>(), userid);
+
+        #endregion Private methods
     }
 
     internal class RappSackPluginTracer : RappSackTracerCore
