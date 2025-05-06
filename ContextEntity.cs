@@ -10,6 +10,9 @@ namespace Rappen.XRM.RappSack
         private IPluginExecutionContext5 context;
         private string preImageName;
         private string postImageName;
+        private Entity target;
+        private Entity pre;
+        private Entity post;
 
         public int Index;
 
@@ -42,14 +45,19 @@ namespace Rappen.XRM.RappSack
                     case ContextEntityType.Target:
                         if (Index < 0)
                         {
-                            if (context.InputParameters.TryGetValue(ParameterName.Target, out Entity target))
+                            if (target != null)
                             {
                                 return target;
                             }
+                            if (context.InputParameters.TryGetValue(ParameterName.Target, out Entity _target))
+                            {
+                                target = _target;
+                            }
                             if (context.InputParameters.TryGetValue(ParameterName.Target, out EntityReference reference))
                             {
-                                return new Entity(reference.LogicalName, reference.Id);
+                                target = new Entity(reference.LogicalName, reference.Id);
                             }
+                            return target;
                         }
                         else
                         {
@@ -64,9 +72,14 @@ namespace Rappen.XRM.RappSack
                     case ContextEntityType.PreImage:
                         if (Index < 0)
                         {
+                            if (pre != null)
+                            {
+                                return pre;
+                            }
                             if (context.PreEntityImages.Count > 0)
                             {
-                                return context.PreEntityImages.FirstOrDefault().Value;
+                                pre = context.PreEntityImages.FirstOrDefault().Value;
+                                return pre;
                             }
                         }
                         else
@@ -84,9 +97,14 @@ namespace Rappen.XRM.RappSack
                     case ContextEntityType.PostImage:
                         if (Index < 0)
                         {
+                            if (post != null)
+                            {
+                                return post;
+                            }
                             if (context.PostEntityImages.Count > 0)
                             {
-                                return context.PostEntityImages.FirstOrDefault().Value;
+                                post = context.PostEntityImages.FirstOrDefault().Value;
+                                return post;
                             }
                         }
                         else
