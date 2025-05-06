@@ -43,7 +43,7 @@ namespace Rappen.XRM.RappSack
 
         #endregion Abstract methods
 
-        #region Public methods
+        #region Implemented Public methods
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -97,7 +97,7 @@ namespace Rappen.XRM.RappSack
 
         public void Trace(string format, params object[] args) => base.Trace(string.Format(format, args));
 
-        #endregion Public methods
+        #endregion Implemented Public methods
 
         #region Private methods
 
@@ -116,7 +116,8 @@ namespace Rappen.XRM.RappSack
             {
                 needtexts.Add($"Wrong entity: {Context.PrimaryEntityName}, need: {NeedEntity}");
             }
-            if (NeedAttributes != null && NeedAttributes.Length > 0 && ContextEntity[ContextEntityType.Target].Attributes.Any(a => NeedAttributes.Any(n => n == a.Key)))
+            if (NeedAttributes != null && NeedAttributes.Length > 0 &&
+                !NeedAttributes.Any(na => Target.Attributes.ContainsKey(na)))
             {
                 needtexts.Add($"Need any attributes: {string.Join(", ", NeedAttributes)}");
             }
