@@ -27,15 +27,25 @@ namespace Rappen.XRM.RappSack
 
         #region Need details from the plugin, override in plugins if needed
 
+        /// <summary>If true, throw if not matching all needs, default: False</summary>
         public virtual bool NeedThrowIfNotMatch { get; } = false;
+        /// <summary>Message name to check, default: accept all messages</summary>
         public virtual string NeedMessage { get; } = string.Empty;
+        /// <summary>Stage to check, default: accept all stages</summary>
         public virtual int NeedStage { get; } = -1;
+        /// <summary>Entity name to check, default: accept all entities</summary>
         public virtual string NeedEntity { get; } = string.Empty;
+        /// <summary>Attributes to check, default: don't care about attributes</summary>
         public virtual string[] NeedAttributes { get; } = new string[0];
+        /// <summary>Define if pre image is needed, default: False</summary>
         public virtual bool NeedPreImage { get; } = false;
+        /// <summary>Define if post image is needed, default: False</summary>
         public virtual bool NeedPostImage { get; } = false;
+        /// <summary>Multiple Messages are accepted, default: no validate</summary>
         public virtual string[] NeedMessages { get; private set; } = new string[0];
+        /// <summary>Multiple Stages are accepted, default: no validate</summary>
         public virtual int[] NeedStages { get; private set; } = new int[0];
+        /// <summary>Multiple Entities are accepted, default: no validate</summary>
         public virtual string[] NeedEntities { get; private set; } = new string[0];
 
         #endregion Need details from the plugin, override in plugins if needed
