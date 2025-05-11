@@ -31,9 +31,12 @@ namespace Rappen.XRM.RappSack
         public virtual string NeedMessage { get; } = string.Empty;
         public virtual int NeedStage { get; } = -1;
         public virtual string NeedEntity { get; } = string.Empty;
-        public virtual string[] NeedAttributes { get; } = null;
+        public virtual string[] NeedAttributes { get; } = new string[0];
         public virtual bool NeedPreImage { get; } = false;
         public virtual bool NeedPostImage { get; } = false;
+        public virtual string[] NeedMessages { get; private set; } = new string[0];
+        public virtual int[] NeedStages { get; private set; } = new int[0];
+        public virtual string[] NeedEntities { get; private set; } = new string[0];
 
         #endregion Need details from the plugin, override in plugins if needed
 
@@ -103,21 +106,33 @@ namespace Rappen.XRM.RappSack
 
         private bool NeedsVerified()
         {
+            if (!string.IsNullOrEmpty(NeedMessage))
+            {
+                NeedMessages = new[] { NeedMessage };
+            }
+            if (NeedStage > -1)
+            {
+                NeedStages = new[] { NeedStage };
+            }
+            if (!string.IsNullOrEmpty(NeedEntity))
+            {
+                NeedEntities = new[] { NeedEntity };
+            }
+
             var needtexts = new List<string>();
-            if (!string.IsNullOrEmpty(NeedMessage) && !NeedMessage.Equals(Context.MessageName, StringComparison.OrdinalIgnoreCase))
+            if (NeedMessages?.Length > 0 && !NeedMessages.Any(m => m.Equals(Context.MessageName, StringComparison.OrdinalIgnoreCase)))
             {
-                needtexts.Add($"Wrong message: {Context.MessageName}, need: {NeedMessage}");
+                needtexts.Add($"Wrong message: {Context.MessageName}, need: {string.Join(", ", NeedMessages)}");
             }
-            if (NeedStage != -1 && NeedStage != Context.Stage)
+            if (NeedStages?.Length > 0 && !NeedStages.Any(s => s == Context.Stage))
             {
-                needtexts.Add($"Wrong stage: {Context.Stage}, need: {NeedStage}");
+                needtexts.Add($"Wrong stage: {Context.Stage}, need: {string.Join(", ", NeedStages)}");
             }
-            if (!string.IsNullOrEmpty(NeedEntity) && !NeedEntity.Equals(Context.PrimaryEntityName, StringComparison.OrdinalIgnoreCase))
+            if (NeedEntities?.Length > 0 && !NeedEntities.Any(e => e.Equals(Context.PrimaryEntityName, StringComparison.OrdinalIgnoreCase)))
             {
-                needtexts.Add($"Wrong entity: {Context.PrimaryEntityName}, need: {NeedEntity}");
+                needtexts.Add($"Wrong entity: {Context.PrimaryEntityName}, need: {string.Join(", ", NeedEntities)}");
             }
-            if (NeedAttributes != null && NeedAttributes.Length > 0 &&
-                !NeedAttributes.Any(na => Target.Attributes.ContainsKey(na)))
+            if (NeedAttributes?.Length > 0 && !NeedAttributes.Any(na => Target.Attributes.ContainsKey(na)))
             {
                 needtexts.Add($"Need any attributes: {string.Join(", ", NeedAttributes)}");
             }
