@@ -613,9 +613,16 @@ namespace Rappen.XRM.RappSack
             {
                 return (T)(object)decimalvalue;
             }
-            if (type == typeof(bool) && bool.TryParse(value, out var boolean))
+            if (type == typeof(bool))
             {
-                return (T)(object)boolean;
+                if (bool.TryParse(value, out var boolean))
+                {
+                    return (T)(object)boolean;
+                }
+                var vallower = value.ToLowerInvariant();
+                var boolval = vallower == "yes" || vallower == "true" || vallower == "1" ||
+                    vallower == "ja" || vallower == "oui" || vallower == "da" || vallower == "jahwoll";
+                return (T)(object)boolval;
             }
             if (type == typeof(DateTime) && DateTime.TryParse(value, out var datetime))
             {
@@ -625,7 +632,7 @@ namespace Rappen.XRM.RappSack
             {
                 throw new InvalidPluginExecutionException($"Environment Variable Value '{variablename}' is not a valid {type.Name}.");
             }
-            return default(T);
+            return default;
         }
 
         /// <summary>
