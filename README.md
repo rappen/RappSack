@@ -17,7 +17,10 @@ Then there are some other classes, most just `static`, like `RappSackMeta`, `Rap
 
 ## Using RappSackk
 
-Open a terminal at the root of a local repo and type:<br/>`git submodule add https://github.com/rappen/RappSack`
+Open a terminal at the root of a local repo and type:
+```
+git submodule add https://github.com/rappen/RappSack
+```
 
 ---
 
