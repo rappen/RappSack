@@ -183,6 +183,52 @@ namespace Rappen.XRM.RappSack
             }
         }
 
+        public static Entity GetParent(this Entity fromrecord, RappSackCore rappsack, string lookup, params string[] columns)
+        {
+            if (fromrecord == null || string.IsNullOrEmpty(lookup) || !fromrecord.Contains(lookup))
+            {
+                return null;
+            }
+            var lookupref = fromrecord.GetAttributeValue<EntityReference>(lookup);
+            if (lookupref == null || lookupref.Id.Equals(Guid.Empty))
+            {
+                return null;
+            }
+            var parent = rappsack.Retrieve(lookupref.LogicalName, lookupref.Id, new ColumnSet(columns));
+            if (parent == null)
+            {
+                rappsack.Trace($"Parent {lookupref.LogicalName} {lookupref.Id} not found");
+            }
+            return parent;
+        }
+
+        public static EntityCollection GetChildren(this Entity fromrecord, RappSackCore rappsack, string table, string lookup, bool onlyactive, params string[] columns)
+        {
+            if (fromrecord == null || string.IsNullOrEmpty(table) || fromrecord.Id.Equals(Guid.Empty))
+            {
+                return new EntityCollection
+                {
+                    EntityName = table
+                };
+            }
+            var query = new QueryExpression(table)
+            {
+                ColumnSet = new ColumnSet(columns),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression(lookup, ConditionOperator.Equal, fromrecord.Id)
+                    }
+                }
+            };
+            if (onlyactive)
+            {
+                query.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
+            }
+            return rappsack.RetrieveMultipleAll(query);
+        }
+
         #endregion Entity extensions
 
         #region Query extensions
