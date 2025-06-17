@@ -40,20 +40,22 @@ namespace Rappen.XRM.RappSack
         {
             get
             {
+                Entity GetImage(EntityImageCollection images, string name) => images
+                        .FirstOrDefault(i =>
+                            i.Key != "PreBusinessEntity" &&
+                            i.Key != "PostBusinessEntity" &&
+                            (string.IsNullOrEmpty(name) || i.Key.Equals(name))).Value;
+
                 switch (type)
                 {
                     case ContextEntityType.Target:
                         if (Index < 0)
                         {
-                            if (target != null)
-                            {
-                                return target;
-                            }
-                            if (context.InputParameters.TryGetValue(ParameterName.Target, out Entity _target))
+                            if (target == null && context.InputParameters.TryGetValue(ParameterName.Target, out Entity _target))
                             {
                                 target = _target;
                             }
-                            if (context.InputParameters.TryGetValue(ParameterName.Target, out EntityReference reference))
+                            else if (target == null && context.InputParameters.TryGetValue(ParameterName.Target, out EntityReference reference))
                             {
                                 target = new Entity(reference.LogicalName, reference.Id);
                             }
@@ -72,15 +74,11 @@ namespace Rappen.XRM.RappSack
                     case ContextEntityType.PreImage:
                         if (Index < 0)
                         {
-                            if (pre != null)
+                            if (pre == null && context.PreEntityImages.Count > 0)
                             {
-                                return pre;
+                                pre = GetImage(context.PreEntityImages, preImageName);
                             }
-                            if (context.PreEntityImages.Count > 0)
-                            {
-                                pre = context.PreEntityImages.FirstOrDefault().Value;
-                                return pre;
-                            }
+                            return pre;
                         }
                         else
                         {
@@ -88,8 +86,7 @@ namespace Rappen.XRM.RappSack
                                 context.PreEntityImagesCollection?.Length == entities.Entities.Count() &&
                                 context.PreEntityImagesCollection.Length > Index)
                             {
-                                return context.PreEntityImagesCollection[Index]
-                                    .FirstOrDefault(pre => string.IsNullOrEmpty(preImageName) ? !pre.Key.Equals("PreBusinessEntity") : pre.Key.Equals(preImageName)).Value;
+                                return GetImage(context.PreEntityImagesCollection[Index], preImageName);
                             }
                         }
                         break;
@@ -97,15 +94,11 @@ namespace Rappen.XRM.RappSack
                     case ContextEntityType.PostImage:
                         if (Index < 0)
                         {
-                            if (post != null)
+                            if (post == null && context.PostEntityImages.Count > 0)
                             {
-                                return post;
+                                post = GetImage(context.PostEntityImages, postImageName);
                             }
-                            if (context.PostEntityImages.Count > 0)
-                            {
-                                post = context.PostEntityImages.FirstOrDefault().Value;
-                                return post;
-                            }
+                            return post;
                         }
                         else
                         {
@@ -113,14 +106,15 @@ namespace Rappen.XRM.RappSack
                                 context.PostEntityImagesCollection?.Length == entities.Entities.Count() &&
                                 context.PostEntityImagesCollection.Length > Index)
                             {
-                                return context.PostEntityImagesCollection[Index]
-                                    .FirstOrDefault(post => string.IsNullOrEmpty(postImageName) ? !post.Key.Equals("PostBusinessEntity") : post.Key.Equals(postImageName)).Value;
+                                return GetImage(context.PostEntityImagesCollection[Index], postImageName);
                             }
                         }
                         break;
 
                     case ContextEntityType.Complete:
-                        return this[ContextEntityType.Target].Merge(this[ContextEntityType.PostImage]).Merge(this[ContextEntityType.PreImage]);
+                        return this[ContextEntityType.Target]
+                            .Merge(this[ContextEntityType.PostImage])
+                            .Merge(this[ContextEntityType.PreImage]);
                 }
                 return null;
             }

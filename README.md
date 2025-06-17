@@ -15,6 +15,13 @@ The `RappSackPlugin` and `RappSackConsole` inherited the `RappSackCore`.<br/>
 The `RappSackTracerCore` helps us to log stuff to where it can be stored. In plugins to the `ITracingService`, for console apps to a file and to the console, for Azure Functions to the general ILogger which shows up in Azure portal.<br/>
 Then there are some other classes, most just `static`, like `RappSackMeta`, `RappSackUtils`.
 
+## Using RappSackk
+
+Open a terminal at the root of a local repo and type:
+```
+git submodule add https://github.com/rappen/RappSack
+```
+
 ---
 
 *Recently extracted and move from `Rappen.XTB.Helper` https://github.com/rappen/Rappen.XTB.Helper*
