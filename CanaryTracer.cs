@@ -122,9 +122,23 @@ namespace Rappen.Dataverse.Canary
             var plugincontext3 = context as IPluginExecutionContext3;
             var plugincontext4 = context as IPluginExecutionContext4;
             var plugincontext5 = context as IPluginExecutionContext5;
+            var plugincontext6 = context as IPluginExecutionContext6;
+            var plugincontext7 = context as IPluginExecutionContext7;
             if (includestage30 || plugincontext?.Stage != 30)
             {
                 tracingservice.Trace($"--- Context {depth} Trace Start ---");
+                if (!Guid.Empty.Equals(plugincontext6?.TenantId ?? Guid.Empty))
+                {
+                    tracingservice.Trace($"TenantId     : {plugincontext6.TenantId}");
+                }
+                if (!string.IsNullOrEmpty(plugincontext6?.EnvironmentId))
+                {
+                    tracingservice.Trace($"EnvironmentId: {plugincontext6.EnvironmentId}");
+                }
+                if (plugincontext7 != null)
+                {
+                    tracingservice.Trace($"IsApplicUser : {plugincontext7.IsApplicationUser}");
+                }
                 if (!string.IsNullOrEmpty(plugincontext5?.InitiatingUserAgent))
                 {
                     tracingservice.Trace($"InitUserAgent: {plugincontext5.InitiatingUserAgent}");
