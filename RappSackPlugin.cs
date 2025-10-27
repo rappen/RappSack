@@ -176,7 +176,7 @@ namespace Rappen.XRM.RappSack
             return false;
         }
 
-        private void SetService(IServiceProvider provider, Guid? userid) => SetService(provider.Get<IOrganizationServiceFactory>(), userid);
+        private void SetService(IServiceProvider provider, Guid? userid) => SetService(provider?.Get<IOrganizationServiceFactory>(), userid);
 
         #endregion Private methods
     }
@@ -187,7 +187,7 @@ namespace Rappen.XRM.RappSack
 
         public RappSackPluginTracer(IServiceProvider provider) : base(TraceTiming.ElapsedSinceLast)
         {
-            if (!(provider.GetService(typeof(ITracingService)) is ITracingService tracingService))
+            if (!(provider?.GetService(typeof(ITracingService)) is ITracingService tracingService))
             {
                 throw new InvalidPluginExecutionException("Failed to get tracing service");
             }
