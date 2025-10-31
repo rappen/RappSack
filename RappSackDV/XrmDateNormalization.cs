@@ -12,6 +12,7 @@ namespace Rappen.XRM.RappSackDV
 
         public static void NormalizeDates(RemoteExecutionContext? ctx)
         {
+            if (ctx == null) return;
             NormalizeParameterCollection(ctx?.InputParameters);
             NormalizeParameterCollection(ctx?.OutputParameters);
             NormalizeParameterCollection(ctx?.SharedVariables);
