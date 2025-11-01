@@ -7,7 +7,7 @@ namespace Rappen.XRM.RappSack
 {
     public class ContextEntity
     {
-        private IPluginExecutionContext5 context;
+        private IPluginExecutionContext context;
         private string preImageName;
         private string postImageName;
         private Entity target;
@@ -19,11 +19,11 @@ namespace Rappen.XRM.RappSack
         /// <summary>
         /// Contructor of ContextEntity to access Target, PreImage, PostImage and Complete
         /// </summary>
-        /// <param name="context">IPluginExecutionContext5 is all you need to use this class</param>
+        /// <param name="context">IPluginExecutionContext is all you need to use this class, may be inherited for newer versions</param>
         /// <param name="preImageName">If you have a specific pre image name, enter it, otherwise to first one will be used</param>
         /// <param name="postImageName">If you have a specific post image name, enter it, otherwise to first one will be used</param>
         /// <param name="index">Index is only used for collection of targets, pre/post images</param>
-        public ContextEntity(IPluginExecutionContext5 context, string preImageName = null, string postImageName = null, int index = -1)
+        public ContextEntity(IPluginExecutionContext context, string preImageName = null, string postImageName = null, int index = -1)
         {
             this.context = context;
             this.preImageName = preImageName;
@@ -83,10 +83,11 @@ namespace Rappen.XRM.RappSack
                         else
                         {
                             if (context.InputParameters.TryGetValue(ParameterName.Targets, out EntityCollection entities) &&
-                                context.PreEntityImagesCollection?.Length == entities.Entities.Count() &&
-                                context.PreEntityImagesCollection.Length > Index)
+                                context is IPluginExecutionContext4 context4 &&
+                                context4.PreEntityImagesCollection?.Length == entities.Entities.Count() &&
+                                context4.PreEntityImagesCollection.Length > Index)
                             {
-                                return GetImage(context.PreEntityImagesCollection[Index], preImageName);
+                                return GetImage(context4.PreEntityImagesCollection[Index], preImageName);
                             }
                         }
                         break;
@@ -103,10 +104,11 @@ namespace Rappen.XRM.RappSack
                         else
                         {
                             if (context.InputParameters.TryGetValue(ParameterName.Targets, out EntityCollection entities) &&
-                                context.PostEntityImagesCollection?.Length == entities.Entities.Count() &&
-                                context.PostEntityImagesCollection.Length > Index)
+                                context is IPluginExecutionContext4 context4 &&
+                                context4.PostEntityImagesCollection?.Length == entities.Entities.Count() &&
+                                context4.PostEntityImagesCollection.Length > Index)
                             {
-                                return GetImage(context.PostEntityImagesCollection[Index], postImageName);
+                                return GetImage(context4.PostEntityImagesCollection[Index], postImageName);
                             }
                         }
                         break;
