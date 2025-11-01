@@ -31,7 +31,12 @@ namespace Rappen.XRM.RappSack
             if (!onlyId)
             {
                 // Preparing all attributes except the one in which entity id is stored
-                var attributes = entity.Attributes.Where(x => x.Key.ToLowerInvariant() != $"{clone.LogicalName}id".ToLowerInvariant() || (Guid)x.Value != clone.Id);
+                var attributes = entity.Attributes
+                    .Where(x =>
+                        x.Key.ToLowerInvariant() != $"{clone.LogicalName}id".ToLowerInvariant() ||
+                        !Guid.TryParse(x.Value.ToString(), out var guid) ||
+                        !guid.Equals(clone.Id))
+                    .ToList();
                 clone.Attributes.AddRange(attributes.Where(a => !clone.Attributes.Contains(a.Key)));
             }
             bag?.Trace($"Cloned {entity.LogicalName} {entity.Id} with {entity.Attributes.Count} attributes");
