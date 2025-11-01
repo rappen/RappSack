@@ -28,10 +28,10 @@ namespace Rappen.XRM.RappSackDV
             typeof(RelatedEntityCollection)
         };
 
-        public static RemoteExecutionContext? Deserialize(this HttpRequestData req) =>
+        public static RemoteExecutionContext Deserialize(HttpRequestData req) =>
             Deserialize(req.ReadAsString() ?? string.Empty);
 
-        public static RemoteExecutionContext? Deserialize(string body)
+        public static RemoteExecutionContext Deserialize(string body)
         {
             if (string.IsNullOrWhiteSpace(body)) return null;
             var serializer = new DataContractJsonSerializer(typeof(RemoteExecutionContext), settings);
