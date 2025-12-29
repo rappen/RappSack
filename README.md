@@ -41,10 +41,13 @@ RappSack is a C# library that provides **base classes and utilities** for workin
 ## 🚀 Quick Start  
 
 ### Install  
-Add RappSack as a submodule:  
+1. Add RappSack as a submodule:  
 ```bash
-git submodule add https://github.com/rappen/RappSack.git
+  git submodule add https://github.com/rappen/RappSack.git
 ```
+2. Add those shared project you need in your solution.
+3. Add added shared projects as refereces to your project(s).
+
 <!--
 Or via NuGet (if published):  
 ```bash
@@ -105,5 +108,4 @@ Pull requests are welcome! Please open an issue for discussion before major chan
 ---
 
 ## 📄 License  
-![License](https://img.shields.io/github/license/rappen/RappSack)  
-MIT License – see [LICENSE](LICENSE).
+![License](https://img.shields.io/github/license/rappen/RappSack)   – see [LICENSE](LICENSE).
