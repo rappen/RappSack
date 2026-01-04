@@ -25,16 +25,23 @@ RappSack is a C# library that provides **base classes and utilities** for workin
 
 ---
 
-## 🧩 Architecture  
+## 🧩 Architecture
+
+### Core (not to implement)
 - **RappSackCore** – Common functionality for all environments, implements `IOrganizationService`
-- **RappSackTracerCore** – Abstract class for unified tracing/logging  
+- **RappSackTracerCore** – Abstract class for unified tracing/logging
+
+### Base Classes (to be implementet)
 - **RappSackPlugin** – Base class for **Dataverse plugins**, inheriting `RappSackCore`, implements `IPlugin` and `ITracingService`
 - **RappSackConsole** – Base class **console apps**, inheriting `RappSackCore`
+
+### Extra helpers
 - **Static helpers** – `RappSackMeta`, `RappSackUtils`
-- **CanaryTracer** – Unifying logging even more, especially for plugins
+- [**CanaryTracer**](https://jonasr.app/canary) – Unifying logging even more, especially for plugins
 
 ### RappSack for [Microsoft.PowerPlatform.Dataverse](https://www.nuget.org/packages/Microsoft.PowerPlatform.Dataverse.Client)
-- **RappSackDVCode** – The same above, but handles newer stuff
+- **RappSackDVCore** – A layer above RappSackCore and handles newer stuff
+- **RappSackDVTracerCore** – A layer above RappSackTracerCore and also handles Microsoft.Extensions.Logging
 
 ---
 
