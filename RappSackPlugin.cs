@@ -15,6 +15,9 @@ namespace Rappen.XRM.RappSack
         public ContextEntity ContextEntity { get; private set; }
         public ContextEntityCollection ContextEntityCollection { get; private set; }
         public Entity Target => ContextEntity?[ContextEntityType.Target];
+        public Entity PreImage => ContextEntity?[ContextEntityType.PreImage];
+        public Entity PostImage => ContextEntity?[ContextEntityType.PostImage];
+        public Entity Complete => ContextEntity?[ContextEntityType.Complete];
 
         #endregion Easier to get relevant from IPlugin
 
