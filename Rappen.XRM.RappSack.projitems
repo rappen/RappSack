@@ -21,4 +21,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)RappSackPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RappSackTracerCore.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory).editorconfig" />
+    <None Include="$(MSBuildThisFileDirectory)CONTRIBUTING.md" />
+  </ItemGroup>
 </Project>
