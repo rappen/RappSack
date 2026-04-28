@@ -10,11 +10,15 @@ namespace Rappen.XRM.RappSack
 {
     public abstract class RappSackCore : IOrganizationService
     {
+        #region Private Parameters
+
         private IOrganizationService service;
         private RappSackTracerCore tracer;
         private const int defaultchunksize = 1000;
 
-        #region Setting up RappSack
+        #endregion Private Parameters
+
+        #region Constructors and Setting up RappSack
 
         public RappSackCore()
         { }
@@ -37,7 +41,7 @@ namespace Rappen.XRM.RappSack
 
         protected string CallerMethodName() => tracer.CallerMethodName();
 
-        #endregion Setting up RappSack
+        #endregion Constructors and Setting up RappSack
 
         #region Tracer
 
@@ -81,7 +85,7 @@ namespace Rappen.XRM.RappSack
 
         #endregion Tracer
 
-        #region IOrganizationService
+        #region Implement IOrganizationService
 
         public Guid Create(Entity entity) => Create(entity, new RequestParameters());
 
@@ -99,7 +103,7 @@ namespace Rappen.XRM.RappSack
 
         public EntityCollection RetrieveMultiple(QueryBase query) => RetrieveMultiple(query, new RequestParameters());
 
-        #endregion IOrganizationService
+        #endregion Implement IOrganizationService
 
         #region IOrganizationService With Params
 
@@ -434,7 +438,7 @@ namespace Rappen.XRM.RappSack
             {
                 throw new InvalidPluginExecutionException($"{entitycoll.Entities.Count} created, but {result.Ids.Count()} IDs returned.");
             }
-            for (int i = 0; i < entitycoll.Entities.Count; i++)
+            for (var i = 0; i < entitycoll.Entities.Count; i++)
             {
                 entitycoll.Entities[i].Id = result.Ids[i];
             }
@@ -654,7 +658,7 @@ namespace Rappen.XRM.RappSack
             catch (InvalidPluginExecutionException)
             {
                 value = defaultvalue;
-                Log($"Using default value: {value}");
+                Trace($"Using default value: {value}");
             }
             TraceOut();
             return value;
