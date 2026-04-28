@@ -18,6 +18,36 @@ namespace Rappen.XRM.RappSack
 
         #region Public methods
 
+        public static T ToEntity<T>(this Entity entity, bool NullIfIncorrectEntity) where T : Entity
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            try
+            {
+                return entity.ToEntity<T>();
+            }
+            catch (NotSupportedException)
+            {
+                if (NullIfIncorrectEntity)
+                {
+                    return null;
+                }
+
+                throw;
+            }
+            catch (NullReferenceException)
+            {
+                if (NullIfIncorrectEntity)
+                {
+                    return null;
+                }
+
+                throw;
+            }
+        }
+
         public static XmlDocument Serialize(Entity entity, XmlNode parent, SerializationStyle style)
         {
             XmlDocument result;
@@ -31,50 +61,50 @@ namespace Rappen.XRM.RappSack
                 parent = result.CreateElement("Entities");
                 result.AppendChild(parent);
             }
-            XmlNode xEntity = GetEntityNode(entity, result, style);
-            foreach (KeyValuePair<string, object> attribute in entity.Attributes)
+            var xEntity = GetEntityNode(entity, result, style);
+            foreach (var attribute in entity.Attributes)
             {
                 if (attribute.Key == entity.LogicalName + "id")
                 {   // Don't include PK
                     continue;
                 }
-                XmlNode xAttribute = GetAttributeNode(result, attribute, style);
-                object value = attribute.Value;
+                var xAttribute = GetAttributeNode(result, attribute, style);
+                var value = attribute.Value;
                 if (value is AliasedValue)
                 {
                     if (!string.IsNullOrEmpty(((AliasedValue)value).EntityLogicalName))
                     {
-                        XmlAttribute xAliasedEntity = result.CreateAttribute("entitylogicalname");
+                        var xAliasedEntity = result.CreateAttribute("entitylogicalname");
                         xAliasedEntity.Value = ((AliasedValue)value).EntityLogicalName;
                         xAttribute.Attributes.Append(xAliasedEntity);
                     }
                     if (!string.IsNullOrEmpty(((AliasedValue)value).AttributeLogicalName))
                     {
-                        XmlAttribute xAliasedAttribute = result.CreateAttribute("attributelogicalname");
+                        var xAliasedAttribute = result.CreateAttribute("attributelogicalname");
                         xAliasedAttribute.Value = ((AliasedValue)value).AttributeLogicalName;
                         xAttribute.Attributes.Append(xAliasedAttribute);
                     }
                     value = ((AliasedValue)value).Value;
                 }
-                XmlAttribute xType = result.CreateAttribute("type");
+                var xType = result.CreateAttribute("type");
                 xType.Value = LastClassName(value);
                 xAttribute.Attributes.Append(xType);
                 if (value is EntityReference)
                 {
-                    XmlAttribute xRefEntity = result.CreateAttribute("entity");
+                    var xRefEntity = result.CreateAttribute("entity");
                     xRefEntity.Value = ((EntityReference)value).LogicalName;
                     xAttribute.Attributes.Append(xRefEntity);
                     if (!string.IsNullOrEmpty(((EntityReference)value).Name))
                     {
-                        XmlAttribute xRefValue = result.CreateAttribute("value");
+                        var xRefValue = result.CreateAttribute("value");
                         xRefValue.Value = ((EntityReference)value).Name;
                         xAttribute.Attributes.Append(xRefValue);
                     }
                 }
-                object basetypevalue = AttributeToBaseType(value);
+                var basetypevalue = AttributeToBaseType(value);
                 if (basetypevalue != null)
                 {
-                    XmlText xValue = result.CreateTextNode(basetypevalue.ToString());
+                    var xValue = result.CreateTextNode(basetypevalue.ToString());
                     xAttribute.AppendChild(xValue);
                 }
                 xEntity.AppendChild(xAttribute);
@@ -86,13 +116,13 @@ namespace Rappen.XRM.RappSack
         public static Entity Deserialize(XmlNode xEntity)
         {
             Entity result;
-            string name = xEntity.Name == "Entity" ? GetXmlAttribute(xEntity, "name") : xEntity.Name;
+            var name = xEntity.Name == "Entity" ? GetXmlAttribute(xEntity, "name") : xEntity.Name;
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new XmlException("Cannot deserialize entity, missing entity name");
             }
-            string strId = GetXmlAttribute(xEntity, "id");
-            Guid id = StringToGuidish(strId);
+            var strId = GetXmlAttribute(xEntity, "id");
+            var id = StringToGuidish(strId);
             if (!id.Equals(Guid.Empty))
             {
                 result = new Entity(name, id);
@@ -105,12 +135,12 @@ namespace Rappen.XRM.RappSack
             {
                 if (xAttribute.NodeType == XmlNodeType.Element)
                 {
-                    string attribute = xAttribute.Name == "Attribute" ? GetXmlAttribute(xAttribute, "name") : xAttribute.Name;
-                    string type = GetXmlAttribute(xAttribute, "type");
-                    string value = xAttribute.ChildNodes.Count > 0 ? xAttribute.ChildNodes[0].InnerText : "";
+                    var attribute = xAttribute.Name == "Attribute" ? GetXmlAttribute(xAttribute, "name") : xAttribute.Name;
+                    var type = GetXmlAttribute(xAttribute, "type");
+                    var value = xAttribute.ChildNodes.Count > 0 ? xAttribute.ChildNodes[0].InnerText : "";
                     if (type == "EntityReference")
                     {
-                        string entity = GetXmlAttribute(xAttribute, "entity");
+                        var entity = GetXmlAttribute(xAttribute, "entity");
                         value = entity + ":" + value;
                         var entrefname = GetXmlAttribute(xAttribute, "value");
                         if (!string.IsNullOrEmpty(entrefname))
@@ -192,15 +222,25 @@ namespace Rappen.XRM.RappSack
                 return result;
             }
             else if (attribute is OptionSetValue osv)
+            {
                 return osv.Value;
+            }
             else if (attribute is OptionSetValueCollection osvc)
+            {
                 return "[" + string.Join(",", osvc.Select(v => v.Value.ToString())) + "]";
+            }
             else if (attribute is Money m)
+            {
                 return m.Value;
+            }
             else if (attribute is BooleanManagedProperty bmp)
+            {
                 return bmp.Value;
+            }
             else
+            {
                 return attribute;
+            }
         }
 
         public static string AttributeToString(object attribute, AttributeMetadata meta, string format)
@@ -396,7 +436,7 @@ namespace Rappen.XRM.RappSack
 
         public static string GetXmlAttribute(XmlNode node, string attribute)
         {
-            XmlAttribute xAtt = node.Attributes[attribute];
+            var xAtt = node.Attributes[attribute];
             if (xAtt != null)
             {
                 return xAtt.Value;
@@ -514,10 +554,10 @@ namespace Rappen.XRM.RappSack
                 case SerializationStyle.Basic:
                     {
                         XmlNode xEntity = result.CreateElement("Entity");
-                        XmlAttribute xEntityName = result.CreateAttribute("name");
+                        var xEntityName = result.CreateAttribute("name");
                         xEntityName.Value = entity.LogicalName;
                         xEntity.Attributes.Append(xEntityName);
-                        XmlAttribute xEntityId = result.CreateAttribute("id");
+                        var xEntityId = result.CreateAttribute("id");
                         xEntityId.Value = entity.Id.ToString();
                         xEntity.Attributes.Append(xEntityId);
                         return xEntity;
@@ -525,7 +565,7 @@ namespace Rappen.XRM.RappSack
                 case SerializationStyle.Explicit:
                     {
                         XmlNode xEntity = result.CreateElement(entity.LogicalName);
-                        XmlAttribute xEntityId = result.CreateAttribute("id");
+                        var xEntityId = result.CreateAttribute("id");
                         xEntityId.Value = entity.Id.ToString();
                         xEntity.Attributes.Append(xEntityId);
                         return xEntity;
@@ -540,8 +580,8 @@ namespace Rappen.XRM.RappSack
             switch (style)
             {
                 case SerializationStyle.Basic:
-                    XmlNode xAttribute = result.CreateNode(XmlNodeType.Element, "Attribute", "");
-                    XmlAttribute xName = result.CreateAttribute("name");
+                    var xAttribute = result.CreateNode(XmlNodeType.Element, "Attribute", "");
+                    var xName = result.CreateAttribute("name");
                     xName.Value = attribute.Key;
                     xAttribute.Attributes.Append(xName);
                     return xAttribute;
@@ -556,7 +596,7 @@ namespace Rappen.XRM.RappSack
 
         private static string LastClassName(object obj)
         {
-            string result = obj == null ? "null" : obj.GetType().ToString();
+            var result = obj == null ? "null" : obj.GetType().ToString();
             result = result.Split('.')[result.Split('.').Length - 1];
             return result;
         }
@@ -596,15 +636,25 @@ namespace Rappen.XRM.RappSack
                     .ToArray();
             }
             else if (attribute is OptionSetValue osv)
+            {
                 return osv.Value;
+            }
             else if (attribute is OptionSetValueCollection osvc)
+            {
                 return osvc.Select(o => o.Value).ToArray();
+            }
             else if (attribute is Money m)
+            {
                 return m.Value;
+            }
             else if (attribute is BooleanManagedProperty bmp)
+            {
                 return bmp.Value;
+            }
             else
+            {
                 return attribute;
+            }
         }
 
         private static string GetOptionSetLabel(AttributeMetadata meta, int value)
@@ -678,9 +728,9 @@ namespace Rappen.XRM.RappSack
                     if (!string.IsNullOrWhiteSpace(value))
                     {
                         var valueparts = value.Split(':');
-                        string entity = valueparts[0];
+                        var entity = valueparts[0];
                         value = valueparts[1];
-                        Guid refId = StringToGuidish(value);
+                        var refId = StringToGuidish(value);
                         var entref = new EntityReference(entity, refId);
                         if (valueparts.Length > 2)
                         {
@@ -708,7 +758,7 @@ namespace Rappen.XRM.RappSack
                 case "Uniqueidentifier":
                     if (!string.IsNullOrWhiteSpace(value))
                     {
-                        Guid uId = StringToGuidish(value);
+                        var uId = StringToGuidish(value);
                         return uId;
                     }
                     break;
@@ -739,11 +789,11 @@ namespace Rappen.XRM.RappSack
 
         private static Guid StringToGuidish(string strId)
         {
-            Guid id = Guid.Empty;
+            var id = Guid.Empty;
             if (!string.IsNullOrWhiteSpace(strId) &&
                 !Guid.TryParse(strId, out id))
             {
-                string template = guidtemplate;
+                var template = guidtemplate;
                 Guid.TryParse(template.Substring(0, 32 - strId.Length) + strId, out id);
             }
             return id;
